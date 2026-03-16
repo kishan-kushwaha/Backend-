@@ -1,0 +1,16 @@
+{
+  "name": "chai-or-backend",
+  "version": "1.0.0",
+  "description": "a backend at chai or code channel -youtube",
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Kishan Kushwah",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
