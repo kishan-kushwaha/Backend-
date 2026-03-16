@@ -1,11 +1,15 @@
 {
   "name": "chai-or-backend",
   "version": "1.0.0",
+<<<<<<< HEAD
   "description": "a backend at chai or code channel -youtube",
   "keywords": [
     "javascript",
     "backend"
   ],
+=======
+  "description": "a backend app",
+>>>>>>> b3eee29 (commit)
   "license": "ISC",
   "author": "Kishan Kushwah",
   "type": "commonjs",
