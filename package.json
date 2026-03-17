@@ -1,20 +1,19 @@
 {
-  "name": "chai-or-backend",
-  "version": "1.0.0",
-<<<<<<< HEAD
-  "description": "a backend at chai or code channel -youtube",
-  "keywords": [
-    "javascript",
-    "backend"
-  ],
-=======
-  "description": "a backend app",
->>>>>>> b3eee29 (commit)
-  "license": "ISC",
-  "author": "Kishan Kushwah",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "name": "chai-or-backend",
+    "version": "1.0.0",
+    "description": "a backend at chai or code channel -youtube",
+    "keywords": [
+        "javascript",
+        "backend"
+    ],
+    "license": "ISC",
+    "author": "Kishan Kushwah",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.14"
+    }
 }
