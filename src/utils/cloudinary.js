@@ -20,8 +20,8 @@ const uploadOnCloudinary = async (localFilePath) => {
                 resource_type: "auto", // ye line ka matlab hai ki cloudinary ko ye batana hai ki file ka type kya hai, agar ye line nahi likhenge to cloudinary sirf images ko upload karega aur videos ko upload nahi karega, isliye resource_type ko auto karna zaruri hai taki cloudinary file ke type ko automatically detect kar sake aur uske accordingly upload kar sake
             })
             // file has been uploDED SUCCESSFULLY
-            console.log("File uploaded successfully on Cloudinary", response.url);
-            // fs.unlinkSync(localFilePath); // delete the file from local storage
+            // console.log("File uploaded successfully on Cloudinary", response.url);
+            fs.unlinkSync(localFilePath); // delete the file from local storage
             return response;
         }
         catch(error){

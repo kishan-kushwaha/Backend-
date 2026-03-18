@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/apiError.js";
+import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -10,8 +10,8 @@ const registerUser = asyncHandler(async (req, res) => {
     //  get user details from frontend
     // validation --v not empty, email format, password strength
     // check if user already exists with the same email : check username, email
-    // check for images, check for avtar
-    // upload them cloudinary and get the url of the uploaded image, check avtar on cloudinary
+    // check for images, check for avatar
+    // upload them cloudinary and get the url of the uploaded image, check avatar on cloudinary
     // create user object - create entry in db
     // remove password and refrresh token field from response
     // checkfor user creation
@@ -21,7 +21,7 @@ const registerUser = asyncHandler(async (req, res) => {
 //    step-1 get user details from frontend
 // jab dat form yaa json se aata hai to wo body mai mil jaata hai
     const {fullName, username, email, password } = req.body
-    console.log("email", email);
+    // // console.log("email", email);
 
 
     // step-2 validation --v not empty, email format, password strength
@@ -39,7 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     // step-3 check if user already exists with the same email : check username, email
-    const existedUser =  User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -48,27 +48,34 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
 
-//   step-4 check for images, check for avtar
+//   step-4 check for images, check for avatar
       
     console.log("req.files", req.files);
-     const avtarLocalPath =   req.files?.avtar[0]?.path;
+     const avatarLocalPath =   req.files?.avatar[0]?.path;
      const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-    //  console.log("avtarLocalPath", avtarLocalPath);
+    //  console.log("avatarLocalPath", avatarLocalPath);
     //  console.log("coverImageLocalPath", coverImageLocalPath);
 
-    //check for avtar
-    if(!avtarLocalPath){
-        throw new ApiError(400, "Avtar is required");
+    //check for avatar
+    if(!avatarLocalPath){
+        throw new ApiError(400, "avatar is required");
     }
 
-    // step-5 upload them cloudinary and get the url of the uploaded image, check avtar on cloudinary
-    const avtar = await uploadOnCloudinary(avtarLocalPath);
+    // classic method to check for cover image
+    // let coverImageLocalPath;
+    // if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+    //     coverImageLocalPath = req.files.coverImage[0].path;
+    // }
+
+
+    // step-5 upload them cloudinary and get the url of the uploaded image, check avatar on cloudinary
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-    //check avtar on cloudinary
-    if (!avtar) {
-        throw new ApiError(400, "Avtar file is required");
+    //check avatar on cloudinary
+    if (!avatar) {
+        throw new ApiError(400, "avatar file is required");
     }
 
 
@@ -76,12 +83,16 @@ const registerUser = asyncHandler(async (req, res) => {
     // step-6 create user object - create entry in db
       const user = await User.create({
         fullName,
-        avtar: avtar.url,
-        coverImage: coverImage?.url || "",   // corner case jab user cover image upload na kare to uske liye empty string set kar dege taki database me null value na aaye
+        avatar: avatar?.secure_url || avatar?.url,
+        coverImage: coverImage?.secure_url || coverImage?.url || "",   // corner case jab user cover image upload na kare to uske liye empty string set kar dege taki database me null value na aaye
          email,
          password,
-        username: username.toLowerCase(),
+        username: username?.toLowerCase(),
       })
+
+      console.log("username:", username);
+console.log("avatar object:", avatar);
+console.log("coverImage object:", coverImage);
 
       // step-7 remove password and refrresh token field from response
       const createdUser = await User.findById(user._id).select(

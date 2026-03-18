@@ -5,8 +5,10 @@ import { DB_NAME } from "../constants.js";
 // we have to wait for connection to be established before starting server
 const connectDB = async () => {
   try {
+        const uri = process.env.MONGODB_URI.replace("/?", `/${DB_NAME}?`);
+
     const connectionInstance = await mongoose.connect(
-      `${process.env.MONGODB_URI}${DB_NAME}`
+      uri
     );
 
     console.log(`\nMongoDB connected !! DB HOST: ${connectionInstance.connection.host}\n`);
