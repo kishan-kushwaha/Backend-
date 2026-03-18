@@ -64,7 +64,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function(next) {  // async or await isliye use krte hai taki password ko hash krne me time lagta hai aur hum chahte hai ki jab tak password hash na ho jaye tab tak user ko response na bheje
      if(!this.isModified("password")) return next();
     
-     this.password = bcrypt.hashSync(this.password, 10);  // is line ka matlab hai ki password ko hash krna hai aur 10 rounds of salt use krna hai taki password ko crack karna mushkil ho jaye
+     this.password = await bcrypt.hashSync(this.password, 10);  // is line ka matlab hai ki password ko hash krna hai aur 10 rounds of salt use krna hai taki password ko crack karna mushkil ho jaye
      next(); // iska means hai ki ye function complete ho gaya hai aur next middleware me ja sakta hai, yaha jab bhi data sav hoga to ye function call hoga aur password ko hash krke database me save karega
 
     })
