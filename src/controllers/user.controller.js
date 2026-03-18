@@ -63,11 +63,11 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // step-5 upload them cloudinary and get the url of the uploaded image, check avtar on cloudinary
-    const avatar = await uploadOnCloudinary(avtarLocalPath);
+    const avtar = await uploadOnCloudinary(avtarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     //check avtar on cloudinary
-    if (!avatar) {
+    if (!avtar) {
         throw new ApiError(400, "Avtar file is required");
     }
 
@@ -76,7 +76,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // step-6 create user object - create entry in db
       const user = await User.create({
         fullName,
-        avatar: avatar.url,
+        avtar: avtar.url,
         coverImage: coverImage?.url || "",   // corner case jab user cover image upload na kare to uske liye empty string set kar dege taki database me null value na aaye
          email,
          password,
