@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 // import { useReducer } from "react";
 
 
@@ -29,7 +30,7 @@ const generateAccessAndRefreshTokens =  async(userId) =>{
 
 
 
-
+// user register karne ke liye controller method, is method me hum user registration ka sara logic likhenge, taki jab bhi user registration ka request aaye to ye method call ho aur user ko register kar de
 const registerUser = asyncHandler(async (req, res) => {
 //    user register k liye logic k steps
    
@@ -153,7 +154,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { email, username , password} = req.body;
 
     // step -2  username or email se data le aao database se, matlab user ko login karwao to user email yaa username me se koi bhi de sakta hai, to hum dono me se kisi bhi field ko use kar ke user ko find kar sakte hai database me
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400, "username or email is required");
     }
 
@@ -176,8 +177,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // step-6 agar password sahi hai to access token aur refresh token generate kar do, iske liye humne ek separate method banaya hai jiska naam hai generateAccessAndRefreshTokens, to usko call kar ke access token aur refresh token generate karenge
-    // const { accessToken, refreshToken } = await
-     generateAccessAndRefreshTokens(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
      //ek or dtaatabse query maar dete hai database se data le aao taki access token aur refresh token ke sath user ki details bhi bhej sako response me, aur password aur refresh token field ko response se exclude kar do taki security badh jaye aur sensitive information response me na aaye
      // optional step hai agar hum access token aur refresh token generate karne ke baad user ki details ko response me bhejna chahte hai to is step ko kar sakte hai, agar nahi bhejna chahte to is step ko skip kar sakte hai
@@ -242,16 +242,68 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     return res
     .status(200)
-    .clearCookie(accessToken, options)
-    .clearCookie(refreshToken, options)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
     .json(new ApiResponse(200,{},"User logged out successfully"))
 
 
 })
 
 
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    // step-1 refresh token ko cookie se le aao
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken 
+
+    // step-2 refresh token ko verify karo
+    if(incomingRefreshToken){
+        throw new ApiError(401, "Unauthorized request");
+    }
+
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+    
+        const user = await User.findById(decodedToken?._id)
+    
+        if(!user){
+            throw new ApiError(401, "Invalid refresh token");   
+        }
+    
+        if( incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Refresh token is expired or used");
+        }
+    
+        // step-3 agar refresh token valid hai to naya access token generate karo
+      const options = {
+        httpOnly: true,
+        secure: true
+      }
+    
+      const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(user._id);
+    
+    
+    
+        // step-4 naya access token response me bhejo   
+        return  res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                { accessToken, refreshToken: newRefreshToken },
+                "Access token refreshed successfully"
+            )
+        )
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refresh token");
+    }
+
+})
+
 export {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    refreshAccessToken
 }
